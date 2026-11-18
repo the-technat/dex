@@ -239,6 +239,10 @@ staticClients:
   # If omitted, ssoSharedWithDefault from sessions config is used.
   # ssoSharedWith:
   # - "*"
+  # Optional: leave the groups claim out of this client's ID tokens, e.g. to keep
+  # them small. With the groups scope, groups still appear in the access token
+  # and at the userinfo endpoint. Defaults to false.
+  # omitGroupsFromIDToken: true
 
 # Example using environment variables
 # Set DEX_CLIENT_ID and DEX_SECURE_CLIENT_SECRET before starting Dex

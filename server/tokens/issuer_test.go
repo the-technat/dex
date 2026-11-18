@@ -3,6 +3,7 @@ package tokens
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/json"
 	"log/slog"
 	"net/url"
 	"testing"
@@ -111,4 +112,41 @@ func TestIssuerTokenTypes(t *testing.T) {
 	require.NoError(t, err)
 	_, ok = headerType(ts.AccessToken)
 	require.False(t, ok, "another client's access token has a typ")
+}
+
+// TestIssuerOmitGroupsFromIDToken checks that a client with
+// OmitGroupsFromIDToken gets no groups claim in its ID token while its access
+// token keeps it, and that other clients get groups in both.
+func TestIssuerOmitGroupsFromIDToken(t *testing.T) {
+	groups := func(token string) []string {
+		jws, err := jose.ParseSigned(token, []jose.SignatureAlgorithm{jose.RS256})
+		require.NoError(t, err)
+		var claims struct {
+			Groups []string `json:"groups"`
+		}
+		require.NoError(t, json.Unmarshal(jws.UnsafePayloadWithoutVerification(), &claims))
+		return claims.Groups
+	}
+
+	iss, _ := newTestIssuer(t)
+	auth := testAuthorization()
+	auth.Scopes = append(auth.Scopes, ScopeGroups)
+	auth.Claims.Groups = []string{"admins", "devs"}
+
+	ts, err := iss.Issue(t.Context(), auth, "", false)
+	require.NoError(t, err)
+	require.Equal(t, auth.Claims.Groups, groups(ts.AccessToken))
+	require.Equal(t, auth.Claims.Groups, groups(ts.IDToken))
+
+	auth.Client.OmitGroupsFromIDToken = true
+	ts, err = iss.Issue(t.Context(), auth, "", false)
+	require.NoError(t, err)
+	require.Equal(t, auth.Claims.Groups, groups(ts.AccessToken), "access token lost its groups")
+	require.Empty(t, groups(ts.IDToken), "ID token kept its groups")
+
+	// An ID token issued alone, as by token exchange, is the only token the
+	// client gets, so it keeps its groups.
+	idToken, _, err := iss.SignIDToken(t.Context(), auth, "", "")
+	require.NoError(t, err)
+	require.Equal(t, auth.Claims.Groups, groups(idToken), "lone ID token lost its groups")
 }

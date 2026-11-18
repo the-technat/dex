@@ -60,6 +60,8 @@ func (OAuth2Client) Fields() []ent.Field {
 			SchemaType(textSchema).
 			Default("").
 			Optional(),
+		field.Bool("omit_groups_from_id_token").
+			Default(false),
 		field.JSON("client_credentials_claims", &storage.ClientCredentialsClaims{}).
 			Optional(),
 	}

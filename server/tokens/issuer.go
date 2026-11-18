@@ -101,8 +101,14 @@ func (i *Issuer) SignAccessToken(ctx context.Context, auth Authorization) (strin
 }
 
 // SignIDToken mints an ID token. accessToken/code, when set, contribute
-// at_hash/c_hash.
+// at_hash/c_hash. The groups claim is left out for a client with
+// OmitGroupsFromIDToken set, unless neither an access token nor a code comes
+// with the ID token: then it is the only place the requested claims can go
+// (OIDC Core 5.4).
 func (i *Issuer) SignIDToken(ctx context.Context, auth Authorization, accessToken, code string) (string, time.Time, error) {
+	if auth.Client.OmitGroupsFromIDToken && (accessToken != "" || code != "") {
+		auth.Claims.Groups = nil
+	}
 	return i.signToken(ctx, auth, accessToken, code, "")
 }
 

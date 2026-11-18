@@ -42,6 +42,8 @@ type OAuth2Client struct {
 	BackchannelLogoutURI string `json:"backchannel_logout_uri,omitempty"`
 	// RefreshTokenLifetime holds the value of the "refresh_token_lifetime" field.
 	RefreshTokenLifetime string `json:"refresh_token_lifetime,omitempty"`
+	// OmitGroupsFromIDToken holds the value of the "omit_groups_from_id_token" field.
+	OmitGroupsFromIDToken bool `json:"omit_groups_from_id_token,omitempty"`
 	// ClientCredentialsClaims holds the value of the "client_credentials_claims" field.
 	ClientCredentialsClaims *storage.ClientCredentialsClaims `json:"client_credentials_claims,omitempty"`
 	selectValues            sql.SelectValues
@@ -54,7 +56,7 @@ func (*OAuth2Client) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case oauth2client.FieldRedirectUris, oauth2client.FieldTrustedPeers, oauth2client.FieldAllowedConnectors, oauth2client.FieldMfaChain, oauth2client.FieldPostLogoutRedirectUris, oauth2client.FieldSSOSharedWith, oauth2client.FieldClientCredentialsClaims:
 			values[i] = new([]byte)
-		case oauth2client.FieldPublic:
+		case oauth2client.FieldPublic, oauth2client.FieldOmitGroupsFromIDToken:
 			values[i] = new(sql.NullBool)
 		case oauth2client.FieldID, oauth2client.FieldSecret, oauth2client.FieldName, oauth2client.FieldLogoURL, oauth2client.FieldBackchannelLogoutURI, oauth2client.FieldRefreshTokenLifetime:
 			values[i] = new(sql.NullString)
@@ -163,6 +165,12 @@ func (_m *OAuth2Client) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RefreshTokenLifetime = value.String
 			}
+		case oauth2client.FieldOmitGroupsFromIDToken:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field omit_groups_from_id_token", values[i])
+			} else if value.Valid {
+				_m.OmitGroupsFromIDToken = value.Bool
+			}
 		case oauth2client.FieldClientCredentialsClaims:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field client_credentials_claims", values[i])
@@ -242,6 +250,9 @@ func (_m *OAuth2Client) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("refresh_token_lifetime=")
 	builder.WriteString(_m.RefreshTokenLifetime)
+	builder.WriteString(", ")
+	builder.WriteString("omit_groups_from_id_token=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OmitGroupsFromIDToken))
 	builder.WriteString(", ")
 	builder.WriteString("client_credentials_claims=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ClientCredentialsClaims))

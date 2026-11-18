@@ -512,4 +512,11 @@ var migrations = []migration{
 			`alter table auth_session add column connector_data bytea;`,
 		},
 	},
+	{
+		stmts: []string{
+			`
+			alter table client
+				add column omit_groups_from_id_token boolean not null default false;`,
+		},
+	},
 }

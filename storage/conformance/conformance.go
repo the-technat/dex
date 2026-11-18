@@ -329,6 +329,7 @@ func testClientCRUD(t *testing.T, s storage.Storage) {
 		BackchannelLogoutURI:   "https://auth.example.com/backchannel-logout",
 		PostLogoutRedirectURIs: []string{"https://auth.example.com/"},
 		RefreshTokenLifetime:   storage.RefreshTokenLifetimeSession,
+		OmitGroupsFromIDToken:  true,
 	}
 	err := s.DeleteClient(ctx, id1)
 	mustBeErrNotFound(t, "client", err)

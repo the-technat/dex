@@ -92,6 +92,11 @@ func RefreshTokenLifetime(v string) predicate.OAuth2Client {
 	return predicate.OAuth2Client(sql.FieldEQ(FieldRefreshTokenLifetime, v))
 }
 
+// OmitGroupsFromIDToken applies equality check predicate on the "omit_groups_from_id_token" field. It's identical to OmitGroupsFromIDTokenEQ.
+func OmitGroupsFromIDToken(v bool) predicate.OAuth2Client {
+	return predicate.OAuth2Client(sql.FieldEQ(FieldOmitGroupsFromIDToken, v))
+}
+
 // SecretEQ applies the EQ predicate on the "secret" field.
 func SecretEQ(v string) predicate.OAuth2Client {
 	return predicate.OAuth2Client(sql.FieldEQ(FieldSecret, v))
@@ -505,6 +510,16 @@ func RefreshTokenLifetimeEqualFold(v string) predicate.OAuth2Client {
 // RefreshTokenLifetimeContainsFold applies the ContainsFold predicate on the "refresh_token_lifetime" field.
 func RefreshTokenLifetimeContainsFold(v string) predicate.OAuth2Client {
 	return predicate.OAuth2Client(sql.FieldContainsFold(FieldRefreshTokenLifetime, v))
+}
+
+// OmitGroupsFromIDTokenEQ applies the EQ predicate on the "omit_groups_from_id_token" field.
+func OmitGroupsFromIDTokenEQ(v bool) predicate.OAuth2Client {
+	return predicate.OAuth2Client(sql.FieldEQ(FieldOmitGroupsFromIDToken, v))
+}
+
+// OmitGroupsFromIDTokenNEQ applies the NEQ predicate on the "omit_groups_from_id_token" field.
+func OmitGroupsFromIDTokenNEQ(v bool) predicate.OAuth2Client {
+	return predicate.OAuth2Client(sql.FieldNEQ(FieldOmitGroupsFromIDToken, v))
 }
 
 // ClientCredentialsClaimsIsNil applies the IsNil predicate on the "client_credentials_claims" field.

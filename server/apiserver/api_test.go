@@ -357,6 +357,58 @@ func TestRefreshToken(t *testing.T) {
 	}
 }
 
+// TestClientOmitGroupsFromIDToken checks that the gRPC API sets and reports
+// OmitGroupsFromIDToken, and that an update leaves it alone unless it is sent.
+func TestClientOmitGroupsFromIDToken(t *testing.T) {
+	logger := newLogger(t)
+	s := memory.New(logger)
+	client := newAPI(t, s, logger)
+	defer client.Close()
+	ctx := t.Context()
+
+	omit := func() bool {
+		t.Helper()
+		resp, err := client.GetClient(ctx, &api.GetClientReq{Id: "test"})
+		if err != nil {
+			t.Fatalf("get client: %v", err)
+		}
+		return resp.Client.OmitGroupsFromIdToken
+	}
+
+	_, err := client.CreateClient(ctx, &api.CreateClientReq{
+		Client: &api.Client{Id: "test", Public: true, OmitGroupsFromIdToken: true},
+	})
+	if err != nil {
+		t.Fatalf("create client: %v", err)
+	}
+	if !omit() {
+		t.Fatal("created client does not omit groups")
+	}
+
+	if _, err := client.UpdateClient(ctx, &api.UpdateClientReq{Id: "test", Name: "renamed"}); err != nil {
+		t.Fatalf("update client: %v", err)
+	}
+	if !omit() {
+		t.Error("an update without the field cleared it")
+	}
+
+	disable := false
+	if _, err := client.UpdateClient(ctx, &api.UpdateClientReq{Id: "test", OmitGroupsFromIdToken: &disable}); err != nil {
+		t.Fatalf("update client: %v", err)
+	}
+	if omit() {
+		t.Error("an update to false did not clear it")
+	}
+
+	list, err := client.ListClients(ctx, &api.ListClientReq{})
+	if err != nil {
+		t.Fatalf("list clients: %v", err)
+	}
+	if len(list.Clients) != 1 || list.Clients[0].OmitGroupsFromIdToken {
+		t.Errorf("list clients reports %v", list.Clients)
+	}
+}
+
 func TestUpdateClient(t *testing.T) {
 	logger := newLogger(t)
 	s := memory.New(logger)

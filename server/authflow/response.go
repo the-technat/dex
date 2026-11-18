@@ -216,8 +216,15 @@ func (h *Handler) issueIDToken(ctx context.Context, w http.ResponseWriter, r *ht
 		return true
 	}
 	resp.implicitOrHybrid = true
+	// The full client, not just its ID: its settings shape the ID token's claims.
+	client, err := h.Storage.GetClient(ctx, authReq.ClientID)
+	if err != nil {
+		h.Logger.ErrorContext(r.Context(), "failed to get client", "client_id", authReq.ClientID, "err", err)
+		h.writeError(w, oauth2.ServerError, "", http.StatusInternalServerError)
+		return false
+	}
 	idToken, idTokenExpiry, err := h.Issuer.SignIDToken(ctx, tokens.Authorization{
-		Client:      storage.Client{ID: authReq.ClientID},
+		Client:      client,
 		Claims:      authReq.Claims,
 		Scopes:      authReq.Scopes,
 		ConnectorID: authReq.ConnectorID,

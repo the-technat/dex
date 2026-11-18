@@ -6696,6 +6696,7 @@ type OAuth2ClientMutation struct {
 	appendsso_shared_with           []string
 	backchannel_logout_uri          *string
 	refresh_token_lifetime          *string
+	omit_groups_from_id_token       *bool
 	client_credentials_claims       **storage.ClientCredentialsClaims
 	clearedFields                   map[string]struct{}
 	done                            bool
@@ -7439,6 +7440,42 @@ func (m *OAuth2ClientMutation) ResetRefreshTokenLifetime() {
 	delete(m.clearedFields, oauth2client.FieldRefreshTokenLifetime)
 }
 
+// SetOmitGroupsFromIDToken sets the "omit_groups_from_id_token" field.
+func (m *OAuth2ClientMutation) SetOmitGroupsFromIDToken(b bool) {
+	m.omit_groups_from_id_token = &b
+}
+
+// OmitGroupsFromIDToken returns the value of the "omit_groups_from_id_token" field in the mutation.
+func (m *OAuth2ClientMutation) OmitGroupsFromIDToken() (r bool, exists bool) {
+	v := m.omit_groups_from_id_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOmitGroupsFromIDToken returns the old "omit_groups_from_id_token" field's value of the OAuth2Client entity.
+// If the OAuth2Client object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OAuth2ClientMutation) OldOmitGroupsFromIDToken(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOmitGroupsFromIDToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOmitGroupsFromIDToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOmitGroupsFromIDToken: %w", err)
+	}
+	return oldValue.OmitGroupsFromIDToken, nil
+}
+
+// ResetOmitGroupsFromIDToken resets all changes to the "omit_groups_from_id_token" field.
+func (m *OAuth2ClientMutation) ResetOmitGroupsFromIDToken() {
+	m.omit_groups_from_id_token = nil
+}
+
 // SetClientCredentialsClaims sets the "client_credentials_claims" field.
 func (m *OAuth2ClientMutation) SetClientCredentialsClaims(scc *storage.ClientCredentialsClaims) {
 	m.client_credentials_claims = &scc
@@ -7522,7 +7559,7 @@ func (m *OAuth2ClientMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OAuth2ClientMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.secret != nil {
 		fields = append(fields, oauth2client.FieldSecret)
 	}
@@ -7559,6 +7596,9 @@ func (m *OAuth2ClientMutation) Fields() []string {
 	if m.refresh_token_lifetime != nil {
 		fields = append(fields, oauth2client.FieldRefreshTokenLifetime)
 	}
+	if m.omit_groups_from_id_token != nil {
+		fields = append(fields, oauth2client.FieldOmitGroupsFromIDToken)
+	}
 	if m.client_credentials_claims != nil {
 		fields = append(fields, oauth2client.FieldClientCredentialsClaims)
 	}
@@ -7594,6 +7634,8 @@ func (m *OAuth2ClientMutation) Field(name string) (ent.Value, bool) {
 		return m.BackchannelLogoutURI()
 	case oauth2client.FieldRefreshTokenLifetime:
 		return m.RefreshTokenLifetime()
+	case oauth2client.FieldOmitGroupsFromIDToken:
+		return m.OmitGroupsFromIDToken()
 	case oauth2client.FieldClientCredentialsClaims:
 		return m.ClientCredentialsClaims()
 	}
@@ -7629,6 +7671,8 @@ func (m *OAuth2ClientMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldBackchannelLogoutURI(ctx)
 	case oauth2client.FieldRefreshTokenLifetime:
 		return m.OldRefreshTokenLifetime(ctx)
+	case oauth2client.FieldOmitGroupsFromIDToken:
+		return m.OldOmitGroupsFromIDToken(ctx)
 	case oauth2client.FieldClientCredentialsClaims:
 		return m.OldClientCredentialsClaims(ctx)
 	}
@@ -7723,6 +7767,13 @@ func (m *OAuth2ClientMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRefreshTokenLifetime(v)
+		return nil
+	case oauth2client.FieldOmitGroupsFromIDToken:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOmitGroupsFromIDToken(v)
 		return nil
 	case oauth2client.FieldClientCredentialsClaims:
 		v, ok := value.(*storage.ClientCredentialsClaims)
@@ -7872,6 +7923,9 @@ func (m *OAuth2ClientMutation) ResetField(name string) error {
 		return nil
 	case oauth2client.FieldRefreshTokenLifetime:
 		m.ResetRefreshTokenLifetime()
+		return nil
+	case oauth2client.FieldOmitGroupsFromIDToken:
+		m.ResetOmitGroupsFromIDToken()
 		return nil
 	case oauth2client.FieldClientCredentialsClaims:
 		m.ResetClientCredentialsClaims()

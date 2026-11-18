@@ -35,6 +35,8 @@ const (
 	FieldBackchannelLogoutURI = "backchannel_logout_uri"
 	// FieldRefreshTokenLifetime holds the string denoting the refresh_token_lifetime field in the database.
 	FieldRefreshTokenLifetime = "refresh_token_lifetime"
+	// FieldOmitGroupsFromIDToken holds the string denoting the omit_groups_from_id_token field in the database.
+	FieldOmitGroupsFromIDToken = "omit_groups_from_id_token"
 	// FieldClientCredentialsClaims holds the string denoting the client_credentials_claims field in the database.
 	FieldClientCredentialsClaims = "client_credentials_claims"
 	// Table holds the table name of the oauth2client in the database.
@@ -56,6 +58,7 @@ var Columns = []string{
 	FieldSSOSharedWith,
 	FieldBackchannelLogoutURI,
 	FieldRefreshTokenLifetime,
+	FieldOmitGroupsFromIDToken,
 	FieldClientCredentialsClaims,
 }
 
@@ -74,6 +77,8 @@ var (
 	DefaultBackchannelLogoutURI string
 	// DefaultRefreshTokenLifetime holds the default value on creation for the "refresh_token_lifetime" field.
 	DefaultRefreshTokenLifetime string
+	// DefaultOmitGroupsFromIDToken holds the default value on creation for the "omit_groups_from_id_token" field.
+	DefaultOmitGroupsFromIDToken bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -114,4 +119,9 @@ func ByBackchannelLogoutURI(opts ...sql.OrderTermOption) OrderOption {
 // ByRefreshTokenLifetime orders the results by the refresh_token_lifetime field.
 func ByRefreshTokenLifetime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRefreshTokenLifetime, opts...).ToFunc()
+}
+
+// ByOmitGroupsFromIDToken orders the results by the omit_groups_from_id_token field.
+func ByOmitGroupsFromIDToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOmitGroupsFromIDToken, opts...).ToFunc()
 }

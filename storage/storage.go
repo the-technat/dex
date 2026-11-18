@@ -214,6 +214,11 @@ type Client struct {
 	// Empty slice [] means explicitly share with no one.
 	SSOSharedWith []string `json:"ssoSharedWith" yaml:"ssoSharedWith"`
 
+	// OmitGroupsFromIDToken keeps the groups claim out of ID tokens issued to this
+	// client, even when the groups scope is requested. Groups still appear in the
+	// access token, and therefore at the userinfo endpoint.
+	OmitGroupsFromIDToken bool `json:"omitGroupsFromIDToken"`
+
 	// ClientCredentialsClaims holds identity claims used when issuing tokens via the
 	// client_credentials grant. Kept separate from core Client fields to avoid mixing
 	// application identity (ID, secret, redirect URIs) with user-like identity attributes.

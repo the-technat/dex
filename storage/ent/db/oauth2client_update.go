@@ -233,6 +233,20 @@ func (_u *OAuth2ClientUpdate) ClearRefreshTokenLifetime() *OAuth2ClientUpdate {
 	return _u
 }
 
+// SetOmitGroupsFromIDToken sets the "omit_groups_from_id_token" field.
+func (_u *OAuth2ClientUpdate) SetOmitGroupsFromIDToken(v bool) *OAuth2ClientUpdate {
+	_u.mutation.SetOmitGroupsFromIDToken(v)
+	return _u
+}
+
+// SetNillableOmitGroupsFromIDToken sets the "omit_groups_from_id_token" field if the given value is not nil.
+func (_u *OAuth2ClientUpdate) SetNillableOmitGroupsFromIDToken(v *bool) *OAuth2ClientUpdate {
+	if v != nil {
+		_u.SetOmitGroupsFromIDToken(*v)
+	}
+	return _u
+}
+
 // SetClientCredentialsClaims sets the "client_credentials_claims" field.
 func (_u *OAuth2ClientUpdate) SetClientCredentialsClaims(v *storage.ClientCredentialsClaims) *OAuth2ClientUpdate {
 	_u.mutation.SetClientCredentialsClaims(v)
@@ -375,6 +389,9 @@ func (_u *OAuth2ClientUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if _u.mutation.RefreshTokenLifetimeCleared() {
 		_spec.ClearField(oauth2client.FieldRefreshTokenLifetime, field.TypeString)
+	}
+	if value, ok := _u.mutation.OmitGroupsFromIDToken(); ok {
+		_spec.SetField(oauth2client.FieldOmitGroupsFromIDToken, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ClientCredentialsClaims(); ok {
 		_spec.SetField(oauth2client.FieldClientCredentialsClaims, field.TypeJSON, value)
@@ -606,6 +623,20 @@ func (_u *OAuth2ClientUpdateOne) ClearRefreshTokenLifetime() *OAuth2ClientUpdate
 	return _u
 }
 
+// SetOmitGroupsFromIDToken sets the "omit_groups_from_id_token" field.
+func (_u *OAuth2ClientUpdateOne) SetOmitGroupsFromIDToken(v bool) *OAuth2ClientUpdateOne {
+	_u.mutation.SetOmitGroupsFromIDToken(v)
+	return _u
+}
+
+// SetNillableOmitGroupsFromIDToken sets the "omit_groups_from_id_token" field if the given value is not nil.
+func (_u *OAuth2ClientUpdateOne) SetNillableOmitGroupsFromIDToken(v *bool) *OAuth2ClientUpdateOne {
+	if v != nil {
+		_u.SetOmitGroupsFromIDToken(*v)
+	}
+	return _u
+}
+
 // SetClientCredentialsClaims sets the "client_credentials_claims" field.
 func (_u *OAuth2ClientUpdateOne) SetClientCredentialsClaims(v *storage.ClientCredentialsClaims) *OAuth2ClientUpdateOne {
 	_u.mutation.SetClientCredentialsClaims(v)
@@ -778,6 +809,9 @@ func (_u *OAuth2ClientUpdateOne) sqlSave(ctx context.Context) (_node *OAuth2Clie
 	}
 	if _u.mutation.RefreshTokenLifetimeCleared() {
 		_spec.ClearField(oauth2client.FieldRefreshTokenLifetime, field.TypeString)
+	}
+	if value, ok := _u.mutation.OmitGroupsFromIDToken(); ok {
+		_spec.SetField(oauth2client.FieldOmitGroupsFromIDToken, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ClientCredentialsClaims(); ok {
 		_spec.SetField(oauth2client.FieldClientCredentialsClaims, field.TypeJSON, value)

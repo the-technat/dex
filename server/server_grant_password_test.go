@@ -183,6 +183,64 @@ func TestHandlePassword_LocalPasswordDBClaims(t *testing.T) {
 	require.Equal(t, []string{"team-a", "team-a/admins"}, claims.Groups)
 }
 
+// TestOmitGroupsFromIDToken checks that a client with OmitGroupsFromIDToken
+// gets no groups claim in its ID token, while the groups scope still delivers
+// them at /userinfo through the access token.
+func TestOmitGroupsFromIDToken(t *testing.T) {
+	ctx := t.Context()
+	httpServer, s := newTestServer(t, func(c *Config) {
+		c.PasswordConnector = "local"
+	})
+	defer httpServer.Close()
+	seedLocalPasswordDB(t, s)
+	require.NoError(t, s.storage.UpdateClient(ctx, "test", func(old storage.Client) (storage.Client, error) {
+		old.OmitGroupsFromIDToken = true
+		return old, nil
+	}))
+
+	u, err := url.Parse(s.issuerURL.String())
+	require.NoError(t, err)
+	u.Path = path.Join(u.Path, "/token")
+
+	v := url.Values{}
+	v.Add("scope", "openid email groups")
+	v.Add("grant_type", "password")
+	v.Add("username", "user@example.com")
+	v.Add("password", "secret")
+
+	req, _ := http.NewRequest("POST", u.String(), bytes.NewBufferString(v.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.SetBasicAuth("test", "barfoo")
+	rr := httptest.NewRecorder()
+	s.ServeHTTP(rr, req)
+	require.Equal(t, http.StatusOK, rr.Code, rr.Body.String())
+
+	var tr tokenResponse
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &tr))
+
+	p, err := oidc.NewProvider(ctx, httpServer.URL)
+	require.NoError(t, err)
+	idToken, err := p.Verifier(&oidc.Config{SkipClientIDCheck: true}).Verify(ctx, tr.IDToken)
+	require.NoError(t, err)
+	var idClaims map[string]any
+	require.NoError(t, idToken.Claims(&idClaims))
+	require.NotContains(t, idClaims, "groups")
+	require.Equal(t, "user@example.com", idClaims["email"])
+
+	u.Path = path.Join(path.Dir(u.Path), "/userinfo")
+	req, _ = http.NewRequest("GET", u.String(), nil)
+	req.Header.Set("Authorization", "Bearer "+tr.AccessToken)
+	rr = httptest.NewRecorder()
+	s.ServeHTTP(rr, req)
+	require.Equal(t, http.StatusOK, rr.Code, rr.Body.String())
+
+	var userinfo struct {
+		Groups []string `json:"groups"`
+	}
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &userinfo))
+	require.Equal(t, []string{"team-a"}, userinfo.Groups)
+}
+
 // TestHandlePasswordLockedAccountDenied covers the review on #5168: the
 // password grant runs the same account-lock check the browser flow's finalize
 // step does, or a locked account could still mint tokens.

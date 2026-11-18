@@ -108,6 +108,20 @@ func (_c *OAuth2ClientCreate) SetNillableRefreshTokenLifetime(v *string) *OAuth2
 	return _c
 }
 
+// SetOmitGroupsFromIDToken sets the "omit_groups_from_id_token" field.
+func (_c *OAuth2ClientCreate) SetOmitGroupsFromIDToken(v bool) *OAuth2ClientCreate {
+	_c.mutation.SetOmitGroupsFromIDToken(v)
+	return _c
+}
+
+// SetNillableOmitGroupsFromIDToken sets the "omit_groups_from_id_token" field if the given value is not nil.
+func (_c *OAuth2ClientCreate) SetNillableOmitGroupsFromIDToken(v *bool) *OAuth2ClientCreate {
+	if v != nil {
+		_c.SetOmitGroupsFromIDToken(*v)
+	}
+	return _c
+}
+
 // SetClientCredentialsClaims sets the "client_credentials_claims" field.
 func (_c *OAuth2ClientCreate) SetClientCredentialsClaims(v *storage.ClientCredentialsClaims) *OAuth2ClientCreate {
 	_c.mutation.SetClientCredentialsClaims(v)
@@ -163,6 +177,10 @@ func (_c *OAuth2ClientCreate) defaults() {
 		v := oauth2client.DefaultRefreshTokenLifetime
 		_c.mutation.SetRefreshTokenLifetime(v)
 	}
+	if _, ok := _c.mutation.OmitGroupsFromIDToken(); !ok {
+		v := oauth2client.DefaultOmitGroupsFromIDToken
+		_c.mutation.SetOmitGroupsFromIDToken(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -178,6 +196,9 @@ func (_c *OAuth2ClientCreate) check() error {
 	}
 	if _, ok := _c.mutation.LogoURL(); !ok {
 		return &ValidationError{Name: "logo_url", err: errors.New(`db: missing required field "OAuth2Client.logo_url"`)}
+	}
+	if _, ok := _c.mutation.OmitGroupsFromIDToken(); !ok {
+		return &ValidationError{Name: "omit_groups_from_id_token", err: errors.New(`db: missing required field "OAuth2Client.omit_groups_from_id_token"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := oauth2client.IDValidator(v); err != nil {
@@ -266,6 +287,10 @@ func (_c *OAuth2ClientCreate) createSpec() (*OAuth2Client, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.RefreshTokenLifetime(); ok {
 		_spec.SetField(oauth2client.FieldRefreshTokenLifetime, field.TypeString, value)
 		_node.RefreshTokenLifetime = value
+	}
+	if value, ok := _c.mutation.OmitGroupsFromIDToken(); ok {
+		_spec.SetField(oauth2client.FieldOmitGroupsFromIDToken, field.TypeBool, value)
+		_node.OmitGroupsFromIDToken = value
 	}
 	if value, ok := _c.mutation.ClientCredentialsClaims(); ok {
 		_spec.SetField(oauth2client.FieldClientCredentialsClaims, field.TypeJSON, value)

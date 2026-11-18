@@ -194,6 +194,10 @@ func init() {
 	oauth2clientDescRefreshTokenLifetime := oauth2clientFields[12].Descriptor()
 	// oauth2client.DefaultRefreshTokenLifetime holds the default value on creation for the refresh_token_lifetime field.
 	oauth2client.DefaultRefreshTokenLifetime = oauth2clientDescRefreshTokenLifetime.Default.(string)
+	// oauth2clientDescOmitGroupsFromIDToken is the schema descriptor for omit_groups_from_id_token field.
+	oauth2clientDescOmitGroupsFromIDToken := oauth2clientFields[13].Descriptor()
+	// oauth2client.DefaultOmitGroupsFromIDToken holds the default value on creation for the omit_groups_from_id_token field.
+	oauth2client.DefaultOmitGroupsFromIDToken = oauth2clientDescOmitGroupsFromIDToken.Default.(bool)
 	// oauth2clientDescID is the schema descriptor for id field.
 	oauth2clientDescID := oauth2clientFields[0].Descriptor()
 	// oauth2client.IDValidator is a validator for the "id" field. It is called by the builders before save.
